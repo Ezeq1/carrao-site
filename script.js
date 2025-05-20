@@ -13,7 +13,6 @@ const sections = id=>document.getElementById(id);
 function show(id){
   document.querySelectorAll('.aba').forEach(s=>s.classList.remove('ativa'));
   sections(id).classList.add('ativa');
-  // disparadores
   if (id==='controle') montarControle();
   if (id==='escalas') montarEscalas();
   if (id==='escalasGerais') montarEscalasGerais();
@@ -56,23 +55,45 @@ formCadastroLogin.onsubmit = e=>{
   formLogin.style.display='block';
 };
 
-// — Login —
+// — Login com código 2FA —
 formLogin.onsubmit = e=>{
   e.preventDefault();
-  const nome= loginNome.value.trim(), sen= loginSenha.value;
+  const nome = loginNome.value.trim(), sen = loginSenha.value;
   vs = JSON.parse(localStorage.getItem('voluntarios')||'[]');
-  const u = vs.find(v=>v.nome===nome&&v.senha===sen);
-  if(!u){ alert('Credenciais inválidas'); return; }
-  sessionStorage.setItem('currentUser',JSON.stringify(u));
-  loginSec.style.display='none'; appDiv.style.display='block';
-  buildNav(u.role);
-  show(u.role==='Admin'?'controle':'escalas');
+  const u = vs.find(v=>v.nome === nome && v.senha === sen);
+  if (!u) return alert('Credenciais inválidas');
+  const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+  sessionStorage.setItem('codigo2fa', codigo);
+  sessionStorage.setItem('userTemp', JSON.stringify(u));
+  alert(`Seu código de verificação (simulado WhatsApp): ${codigo}`);
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <label>Digite o código de verificação:</label>
+    <input type="text" id="codigoDigitado" style="margin-top:8px;">
+    <button onclick="verificarCodigo2FA()" style="margin-top:10px;">Confirmar</button>
+  `;
+  formLogin.replaceWith(div);
 };
+
+function verificarCodigo2FA(){
+  const digitado = document.getElementById('codigoDigitado').value;
+  const correto = sessionStorage.getItem('codigo2fa');
+  if (digitado !== correto) return alert('Código incorreto!');
+  const user = JSON.parse(sessionStorage.getItem('userTemp'));
+  sessionStorage.setItem('currentUser', JSON.stringify(user));
+  sessionStorage.removeItem('codigo2fa');
+  sessionStorage.removeItem('userTemp');
+  loginSec.style.display = 'none';
+  appDiv.style.display = 'block';
+  buildNav(user.role);
+  show(user.role === 'Admin' ? 'controle' : 'escalas');
+}
 
 // — Logout —
 function logout(){
-  sessionStorage.removeItem('currentUser');
+  sessionStorage.clear();
   appDiv.style.display='none'; loginSec.style.display='block';
+  location.reload();
 }
 
 // — Monta Nav Dinâmica —
@@ -87,7 +108,7 @@ function buildNav(role){
     navBar.innerHTML += btn('Minhas Escalas','escalas')+
                         btn('Meu Relatório','relatorios');
   }
-  navBar.innerHTML += btn('Sair','','logout','logout')  
+  navBar.innerHTML += btn('Sair','','logout','logout')
                    .replace('onclick="show', 'onclick="logout');
 }
 
@@ -97,10 +118,18 @@ function domingosDoMes(){
   const ano = hoje.getFullYear(), mes = hoje.getMonth();
   const d = new Date(ano, mes, 1);
   while (d.getMonth() === mes) {
-    if (d.getDay() === 0) arr.push(new Date(d));
+    if (d.getDay() === 0) {
+      let domingo = new Date(d);
+      domingo.setHours(12,0,0,0);
+      arr.push(domingo);
+    }
     d.setDate(d.getDate() + 1);
   }
   return arr;
+}
+
+function toICSDate(d){
+  return d.toISOString().replace(/[-:]|\.\d{3}/g, '').slice(0,15) + 'Z';
 }
 
 // — Formatação de data —
@@ -112,7 +141,6 @@ function corStatus(s){ return {confirmado:'green',trocado:'red',assumido:'blue'}
 function montarEscalas(){
   const user = JSON.parse(sessionStorage.getItem('currentUser'));
   let escAll = JSON.parse(localStorage.getItem('escalas')||'{}');
-  // garante que cada domingo tem entrada
   domingosDoMes().forEach(d=>{
     const ds = fmt(d);
     if (!escAll[ds]) {
@@ -124,7 +152,6 @@ function montarEscalas(){
     }
   });
   localStorage.setItem('escalas',JSON.stringify(escAll));
-
   listaEscalas.innerHTML = '';
   domingosDoMes().forEach(d=>{
     const ds = fmt(d), arr = escAll[ds];
@@ -147,6 +174,7 @@ function montarEscalas(){
       </div>`;
   });
 }
+
 function confirmarPresenca(ds){
   let esc = JSON.parse(localStorage.getItem('escalas'));
   const user = JSON.parse(sessionStorage.getItem('currentUser'));
@@ -155,6 +183,7 @@ function confirmarPresenca(ds){
   localStorage.setItem('escalas',JSON.stringify(esc));
   montarEscalas();
 }
+
 function trocaUI(ds){
   document.querySelectorAll('.troca-area').forEach(a=>a.innerHTML='');
   const user = JSON.parse(sessionStorage.getItem('currentUser'));
@@ -169,6 +198,7 @@ function trocaUI(ds){
   sel+=`</select><button onclick="confirmarTroca('${ds}')" class="btn-transfer">OK</button>`;
   area.innerHTML = sel;
 }
+
 function confirmarTroca(ds){
   const user = JSON.parse(sessionStorage.getItem('currentUser'));
   let esc = JSON.parse(localStorage.getItem('escalas'));
@@ -191,17 +221,31 @@ function montarEscalasGerais(){
     let card = `<div class="escala-card"><h3>${fmtExt(d)}</h3>`;
     arr.forEach(e=>{
       const c = corStatus(e.status);
+      const ics = encodeURIComponent(`BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:Escala Carrão Kids
+DESCRIPTION:${e.nome} escalado como ${e.funcao}-${e.turma}
+DTSTART:${toICSDate(d)}
+DTEND:${toICSDate(new Date(d.getTime() + 60*60*1000))}
+LOCATION:Igreja Presbiteriana do Carrão
+END:VEVENT
+END:VCALENDAR`);
       card+=`
         <div class="vol-item" style="border-left:5px solid ${c};">
           ${e.nome} (${e.funcao}-${e.turma}) — <span style="color:${c};">${e.status}</span><br>
           <button class="btn-clear btn-sm" onclick="limparStatus('${ds}','${e.nome}')">Limpar</button>
           <button class="btn-transfer btn-sm" onclick="transferirPara('${ds}','${e.nome}')">Transferir</button>
+          <a href="data:text/calendar;charset=utf8,${ics}" download="escala-${e.nome}.ics">
+            <button class="btn-transfer btn-sm">📅 Agendar</button>
+          </a>
         </div>`;
     });
     card+='</div>';
     listaEscalasGerais.innerHTML += card;
   });
 }
+
 function limparStatus(ds,nome){
   const esc = JSON.parse(localStorage.getItem('escalas')||'{}');
   const e = esc[ds].find(x=>x.nome===nome);
@@ -209,6 +253,7 @@ function limparStatus(ds,nome){
   localStorage.setItem('escalas',JSON.stringify(esc));
   montarEscalasGerais();
 }
+
 function transferirPara(ds,nome){
   const nova = prompt('Nova data (YYYY-MM-DD):');
   if(!nova||!/^\d{4}-\d{2}-\d{2}$/.test(nova)) return alert('Formato inválido');
