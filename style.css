@@ -421,3 +421,40 @@ main > section {
 main {
   padding: 16px 8px;  /* menos margem lateral */
 }
+@media (max-width: 600px) {
+  body {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .login-container, .card, .escala-card, .painel-admin {
+    width: 100% !important;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+
+  .header-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .header-inner img.logo {
+    max-width: 120px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  button {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
