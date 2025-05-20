@@ -11,6 +11,8 @@ body {
   background: #F0F4C3;
   color: #333;
   line-height: 1.4;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 h1, h2, h3, h4, h5 {
   font-weight: 700;
@@ -46,10 +48,12 @@ h3 { font-size: 1.4rem; margin-bottom: 8px; }
   padding: 30px 24px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.1);
   text-align: center;
+  width: 90%;
+  margin: 16px auto;
 }
 .auth-logo {
-  width: 80px;
-  margin-bottom: 16px;
+  width: 60px;
+  margin-bottom: 12px;
 }
 .auth-card h2 {
   margin-bottom: 16px;
@@ -72,7 +76,7 @@ h3 { font-size: 1.4rem; margin-bottom: 8px; }
 .auth-form input,
 .auth-form select {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 14px;
   margin-top: 6px;
   border: 2px solid #C5E1A5;
   border-radius: 8px;
@@ -92,7 +96,7 @@ h3 { font-size: 1.4rem; margin-bottom: 8px; }
   border: none;
   border-radius: 30px;
   font-size: 1.1rem;
-  padding: 12px;
+  padding: 14px 20px;
   box-shadow: 0 4px 12px rgba(124,179,66,0.4);
   transition: background 0.3s, transform 0.2s;
 }
@@ -133,23 +137,26 @@ header h1 {
   color: #FFF;
   font-family: 'Comic Sans MS', cursive, sans-serif;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+  font-size: 1.8rem;
 }
 #navBar {
   display: flex;
   justify-content: center;
   gap: 12px;
   margin-top: 12px;
+  flex-wrap: wrap;
 }
 #navBar button {
   background: #CDDC39;
   color: #2E7D32;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 24px;
+  border-radius: 30px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: background 0.3s, transform 0.2s;
+  font-size: 1rem;
 }
 #navBar button.active,
 #navBar button:hover {
@@ -162,6 +169,50 @@ header h1 {
 }
 #navBar .logout:hover {
   background: #EF5350;
+}
+
+/* ===========================
+   MOBILE RESPONSIVO
+   =========================== */
+@media (max-width: 480px) {
+  .auth-form input,
+  .auth-form select,
+  .btn-login {
+    font-size: 1.1rem;
+    padding: 14px 16px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  .logo {
+    width: 50px;
+  }
+
+  #navBar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .auth-card {
+    padding: 20px 16px;
+  }
+
+  .vol-item button {
+    width: 100%;
+  }
+
+  #listaEscalas .vol-item,
+  #listaEscalasGerais .vol-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #tblVols th, #tblVols td {
+    font-size: 0.9rem;
+    padding: 8px 6px;
+  }
 }
 
 /* ===========================
