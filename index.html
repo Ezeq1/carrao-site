@@ -2,45 +2,135 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carrão Kids</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome para ícones -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- LOGIN & CADASTRO -->
   <section id="login" class="aba ativa">
     <div class="card auth-card">
-      <img src="logo.png" alt="Carrão Kids Logo" class="auth-logo" />
-      <h2><i class="fas fa-lock"></i> Acesso Admin</h2>
+      <h2>
+        <img
+          src="https://i.imgur.com/tQeu2If.png"
+          alt="Carrão Kids Logo"
+          class="auth-logo"
+        />
+      </h2>
 
-      <form id="formSenha" class="auth-form">
-        <label><i class="fas fa-user"></i> Nome de Usuário</label>
-        <input type="text" id="loginNome" placeholder="Seu nome" required />
+      <!-- Formulário de Login -->
+      <form id="formLogin" class="auth-form">
+        <label><i class="fas fa-user"></i> Nome completo</label>
+        <input
+          type="text"
+          id="loginNome"
+          placeholder="Seu nome"
+          required
+        />
 
-        <label><i class="fas fa-key"></i> Senha</label>
-        <input type="password" id="loginSenha" placeholder="Senha fixa" required />
+        <label><i class="fas fa-lock"></i> Senha</label>
+        <input
+          type="password"
+          id="loginSenha"
+          placeholder="Sua senha"
+          required
+        />
 
         <button type="submit" class="btn-login">Entrar</button>
       </form>
 
-      <form id="formCodigo" class="auth-form" style="display:none;">
-        <label><i class="fas fa-shield-alt"></i> Código de Verificação</label>
-        <input type="text" id="codigoVerificacao" placeholder="Digite o código recebido" required />
-        <button type="button" id="verificarCodigo" class="btn-login">Verificar Código</button>
+      <p class="switch-form">
+        Ainda não é cadastrado?
+        <a href="#" id="linkParaCadastro">Cadastre-se</a>
+      </p>
+
+      <!-- Formulário de Cadastro -->
+      <form
+        id="formCadastroLogin"
+        class="auth-form"
+        style="display:none;"
+      >
+        <h3><i class="fas fa-user-plus"></i> Cadastro de Voluntário</h3>
+
+        <label><i class="fas fa-user"></i> Nome completo</label>
+        <input
+          type="text"
+          id="cadNome"
+          placeholder="Nome completo"
+          required
+        />
+
+        <label><i class="fas fa-users"></i> Turma</label>
+        <select id="cadTurma" required>
+          <option value="">Selecione</option>
+          <option value="Kids I">Kids I</option>
+          <option value="Kids II">Kids II</option>
+        </select>
+
+        <label><i class="fas fa-briefcase"></i> Função</label>
+        <select id="cadFuncao" required>
+          <option value="">Selecione</option>
+          <option value="Auxiliar">Auxiliar</option>
+          <option value="Professor">Professor</option>
+        </select>
+
+        <label><i class="fas fa-phone"></i> Contato</label>
+        <input
+          type="text"
+          id="cadContato"
+          placeholder="Telefone ou e‑mail"
+          required
+        />
+
+        <label><i class="fas fa-calendar-alt"></i> Domingos/mês</label>
+        <input
+          type="number"
+          id="cadDomingos"
+          min="1"
+          max="5"
+          required
+        />
+
+        <label><i class="fas fa-birthday-cake"></i> Data de nascimento</label>
+        <input type="date" id="cadNascimento" required />
+
+        <label><i class="fas fa-key"></i> Senha</label>
+        <input
+          type="password"
+          id="cadSenha"
+          placeholder="Senha"
+          required
+        />
+
+        <button type="submit" class="btn-login">Cadastrar</button>
+
+        <p class="switch-form">
+          Já tem cadastro?
+          <a href="#" id="linkParaLogin">Voltar ao login</a>
+        </p>
       </form>
     </div>
   </section>
 
+  <!-- ÁREA PRINCIPAL (aparece após login) -->
   <div id="app" style="display:none;">
     <header>
       <div class="header-inner">
-        <img src="logo.png" alt="Carrão Kids Logo" class="logo" />
+        <img
+          src="https://i.imgur.com/tQeu2If.png"
+          alt="Carrão Kids Logo"
+          class="logo"
+        />
         <h1>Carrão Kids</h1>
       </div>
       <nav id="navBar"></nav>
     </header>
+
     <main>
-      <!-- ÁREAS COMPLETAS DO SISTEMA -->
       <!-- Controle de Voluntários (admin) -->
       <section id="controle" class="aba">
         <h2>Controle de Voluntários</h2>
@@ -87,39 +177,5 @@
   </div>
 
   <script src="script.js"></script>
-  <script>
-    const senhaFixa = '*98As6532';
-    let codigoGerado = '';
-
-    document.getElementById('formSenha').onsubmit = (e) => {
-      e.preventDefault();
-      const nome = document.getElementById('loginNome').value.trim();
-      const senha = document.getElementById('loginSenha').value;
-
-      if (senha !== senhaFixa) {
-        alert('Senha incorreta!');
-        return;
-      }
-
-      sessionStorage.setItem('currentUser', JSON.stringify({ nome, role: 'Admin' }));
-      codigoGerado = Math.floor(100000 + Math.random() * 900000).toString();
-      alert(`Código enviado via WhatsApp: ${codigoGerado}`);
-
-      document.getElementById('formSenha').style.display = 'none';
-      document.getElementById('formCodigo').style.display = 'block';
-    };
-
-    document.getElementById('verificarCodigo').onclick = () => {
-      const codigoDigitado = document.getElementById('codigoVerificacao').value;
-      if (codigoDigitado === codigoGerado) {
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        buildNav('Admin');
-        show('controle');
-      } else {
-        alert('Código incorreto. Tente novamente.');
-      }
-    };
-  </script>
 </body>
 </html>
